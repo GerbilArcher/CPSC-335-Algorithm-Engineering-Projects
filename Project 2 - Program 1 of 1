@@ -1,0 +1,625 @@
+//=====================================================================
+//CPSC-335-04 (13772) Fibonacci & Largest Sum Assignment (Project 2)
+//Document:       Source.cpp (C++ Code File)
+//Due Date:       10/22/2021
+//Term:           Fall 2021
+//=====================================================================
+
+#include<cmath>
+#include<sstream>
+#include<vector>
+#include<iostream>
+using namespace std;
+
+void showMenu(int &loopControl); //shows the menu and calls the overall functions for Part A and Part B
+void fibonacciProblem(); //overall function for Part A
+int getFibonacciTerm(); //gets term from user and checks for validity
+int findFibonacciValue(int term); //recursively finds Fibonacci value
+int equationOne(int term); //uses equation (1) to find Fibonacci value
+void equationTwo(); //gets 'p' and 'n' values from user, checks validity, calls calculation function
+int equationTwoCalculation(int n, int p); //uses equation (2) to find Fibonacci value
+void equationThree(); //gets 'p' value from user, checks validity, calls calculation function
+int equationThreeCalculation(int p); //uses equation (3) to find Fibonacci value
+void largestSum(); //overall function for Part B, calls function that finds beginning and end vector addresses for largest sum
+void largestSumCalculation(vector<int> &sampleInput, int ends[2]); //finds beginning and end vector addresses for largest sum
+
+
+int main()
+{
+
+  int loopControl = 0; //declare loop control variable for menu fucntion
+
+  while (loopControl == 0) //loop the program menu while user has not selected to exit from the menu
+  {
+    showMenu(loopControl); //call show menu function and pass loop control variable by reference
+  }
+
+  system("clear"); //clear the screen when the progam has finished running
+
+	return 0;
+
+}
+
+//shows the menu and calls the overall functions for Part A and Part B
+void showMenu(int &loopControl)
+{
+	int userSelection = 0; //call variable to hold user selection
+	bool isNotValid = true; //call boolean loop control variable
+
+	while (isNotValid) //loop menu until a valid option is chosen
+	{
+		system("clear"); //clear the screen before showing the menu
+
+    //show the menu
+		cout << endl << endl << "          *-*-*-*-*   PROJECT 2 MENU   *-*-*-*-*";
+		cout << endl << endl << "    Please make your selection from the options below:";
+		cout << endl << endl << "    1. Problem 1: The Fibonacci Problem and the Golden Ratio";
+		cout << endl << endl << "    2. Problem 2: The Largest Sum Subarray Problem";
+		cout << endl << endl << "    3. Exit Program";
+		cout << endl << endl << endl << "    Your Selection:  ";
+
+		cin >> userSelection; //prompt the user for a menu selection
+
+		switch (userSelection) //case switch statement for user selection
+		{
+		case 1: //user chooses option 1, Fibonacci and Golden Ratio functions
+			fibonacciProblem(); //call Part A overall function if user picks option 1
+			isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+			break;
+
+		case 2: //user chooses option 2, Largest Sum Subarray functions
+			largestSum(); //call Part B overall function if user picks option 2
+			isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+			break;
+
+		case 3:
+      isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+	    loopControl = 1; //set menu loop control variable passed from main != 0 so program can terminate
+			break;
+
+		default: //if user hasn't selected 1, 2, or 3 the input is invalid
+			cout << endl << endl << "You've made an invalid selection.  Please try again." << endl << endl;
+      cin.ignore(); //clear the stream
+      cin.get(); //wait for user to hit a key to continue
+
+		}
+	}
+}
+
+//overall function for Part A
+void fibonacciProblem()
+{
+	int userTerm = 0; //declare int to hold Fibonacci term input from the user
+	int a = 0, b = 0; //declare ints to hold calculated Fibonacci terms during Golden Ratio check
+	double c = 0, d = 0; //declare doubles to hold converted int values so that untruncated ratio can be calculated
+	double goldenRatioCheck = 0; //declare double to hold calculated ratios
+
+	system("clear"); //clear the screen prior to starting Fibonacci functions
+
+	cout << "Part A: The First Approach"; //show which parts of the assignment is being addressed
+
+	cout << endl << endl << "a. Develop a recursive algorithm to calculate the nth terms of the sequence." << endl << endl;
+
+  cin.ignore(); //clear the stream
+	cin.get(); //wait for user to hit a key to continue
+
+	userTerm = getFibonacciTerm(); //call function to get Fibonacci term from user, store validated input in userTerm int variable
+
+  //calculate and output the Fibonacci value for the term the user selected
+	cout << endl << endl << "The Fibonacci value for this term is: " << findFibonacciValue(userTerm) << endl << endl;
+
+  cin.ignore(); //clear the stream
+	cin.get(); //wait for user to hit a key to continue
+
+	system("clear"); //clear the screen prior to moving on from subpart a.
+
+	cout << "b. Apply the formula above to obtain other members."; //show which parts of the assignment is being addressed
+
+	cout << endl << endl << "c. Print out a sequence of 20 terms."; //show which parts of the assignment is being addressed
+
+  //output the first 20 terms of the Fibonacci Sequence using recursive algorithm function
+	cout << endl << endl << endl << endl << "    The first 20 terms of the Fibonacci Sequence are as follows:" << endl << endl;
+
+	cout << "    "; //indent for clarity
+
+	for (int j = 1; j <= 20; j++) //loop 20 times
+	{
+		cout << findFibonacciValue(j); //call recursive Fibonacci value calculation and output the value
+
+		if (j < 20) //if not outputting the very last term...
+			cout << ", "; //...put a comma and space seperator between each printed value
+	}
+
+	cout << endl << endl; //line spacing
+
+	cin.get(); //wait for user to hit a key to continue
+
+	system("clear"); //clear the screen prior to showing Part B functionality
+
+	cout << "Part B: The Second Approach"; //show which parts of the assignment is being addressed
+
+	cout << endl << endl << "a. Develop algorithms to get the Fibonacci numbers using equation (2) and (3) above.";
+
+  cin.get(); //wait for user to hit a key to continue
+
+	equationTwo(); //call equation (2) overall function
+
+	equationThree(); //call equation (3) overall function
+
+	system("clear"); //clear the screen prior to showing next function
+
+	cout << "b. Print the first 20 terms of the sequence."; //show which parts of the assignment is being addressed
+
+	cout << endl << endl << "c. Compare your outputs when equation (2) is used against equation (3).";
+
+	cout << endl << endl << endl << endl << "    Here are the first 20 terms using equation (2):";
+
+	cout << endl << endl << "     "; //indent for clarity
+
+	for (int k = 1; k <= 20; k++) //loop 20 times
+	{
+		cout << equationTwoCalculation(k, (k - 1)); //print the first 20 Fibonacci terms using equation (2) algorithm
+
+		if (k < 20) //if not outputting the very last term...
+			cout << ", "; //...put a comma and space seperator between each printed value
+	}
+
+	cout << endl << endl << endl << endl << "    Here are the first 20 terms using equation (3):";
+
+	cout << endl << endl << "     "; //indent for clarity
+
+	for (int l = 0; l < 20; l++) //loop 20 times
+	{
+		cout << equationThreeCalculation(l);  //print the first 20 Fibonacci terms using equation (2) algorithm
+
+		if (l < 19)  //if not outputting the very last term...
+			cout << ", "; //...put a comma and space seperator between each printed value
+	}
+
+	cout << endl << endl << endl << endl << "    Comparison: The outputs for equations (2) and (3) are identical." << endl << endl; //compare the output of equations (2) and (3)
+
+	cin.get(); //wait for user to hit a key to continue
+
+	system("clear"); //clear the screen prior to starting the next section
+
+	cout << "d. Check and confirm or disprove the maxim above using F7 and F30 from both approaches.";
+
+  //explain the problem and what each output will signify
+	cout << endl << endl << "    The maxim we're investigating states that the ratio of two consecutive Fibonacci numbers approaches the Golden Ratio as n gets bigger.";
+
+	cout << endl << endl << "    To investigate this we'll need to find the ratio of two conecutive Fibonacci numbers and compare them to the Golden Ratio (1.61803398875).";
+
+	cout << endl << endl << "    Therefore, using equations (2) and (3), I'll find the ratio of F7 and F6, and then of F30 and F29.";
+
+	cout << endl << endl << "    If the ratio of F30 and F29 is closer to the Golden Ratio than the ratio of F7 and F6, then the maxim is confirmed.  Otherwise it is disproved.";
+
+  cin.get(); //wait for user to hit a key to continue
+
+	cout << endl << endl << endl << "    Using equation (2), the ratio of F7 and F6 is: ";
+
+	a = equationTwoCalculation(7, 6); //calculate F7 using equation (2) algorithm
+	b = equationTwoCalculation(6, 5); //calculate F6 using equation (2) algorithm
+	c = double(a); //convert F7 from int to double
+	d = double(b); //convert F6 from int to double
+	goldenRatioCheck = (c / d); //find the ratio
+	cout << goldenRatioCheck; //print the ratio
+
+
+	cout << endl << endl << "    Using equation (2), the ratio of F30 and F29 is: ";
+
+	a = equationTwoCalculation(30, 29); //calculate F30 using equation (2) algorithm
+	b = equationTwoCalculation(29, 28); //calculate F29 using equation (2) algorithm
+	c = double(a); //convert F30 from int to double
+	d = double(b); //convert F29 from int to double
+	goldenRatioCheck = (c / d); //find the ratio
+	cout << goldenRatioCheck; //print the ratio
+
+
+	cout << endl << endl << "    Using equation (3), the ratio of F7 and F6 is: ";
+
+	a = equationThreeCalculation(6); //calculate F7 using equation (3) algorithm
+	b = equationThreeCalculation(5); //calculate F6 using equation (3) algorithm
+	c = double(a); //convert F7 from int to double
+	d = double(b); //convert F6 from int to double
+	goldenRatioCheck = (c / d); //find the ratio
+	cout << goldenRatioCheck; //print the ratio
+
+	cout << endl << endl << "    Using equation (3), the ratio of F30 and F29 is: ";
+
+	a = equationThreeCalculation(29); //calculate F30 using equation (3) algorithm
+	b = equationThreeCalculation(28); //calculate F29 using equation (3) algorithm
+	c = double(a); //convert F30 from int to double
+	d = double(b); //convert F29 from int to double
+	goldenRatioCheck = (c / d); //find the ratio
+	cout << goldenRatioCheck; //print the ratio
+
+	cout << endl << endl << endl << endl;//line spacing
+
+	cout << "    Since the ratios of F30 and F29 using both equations is closer to the Golden Ratio than the ratios of F7 and F6 using both equations, the maxim is confirmed." << endl << endl;
+
+	cin.get(); //wait for user to hit a key to continue
+
+	system("clear"); //clear the screen before displaying next section
+
+  //show which parts of the assignment is being addressed
+	cout << "e. Mathematically estimate the 31st and 32nd terms of the sequence using either equation (2) or (3) above.";
+
+  //calcualte the 31st and 32nd terms using equation 3 and output the results
+	cout << endl << endl << "    Using equation (3), the 31st term is " << equationThreeCalculation(30) << " and the 32nd term is " << equationThreeCalculation(31) << "." << endl << endl;
+
+	cin.get(); //wait for user to hit a key to continue
+}
+
+//gets term from user and checks for validity
+int getFibonacciTerm()
+{
+	string userSelection = ""; //declare string to hold user input
+	int fibonacciTerm = 0; //delcare int to hold converted user input string after input validation
+	bool isNotString = true; //loop control variable
+
+	while (isNotString) //continue the loop until valid input is received
+	{
+		system("clear"); //clear the screen prior to prompting user for input
+
+		cout << "Please enter a term to find in the Fibonacci Sequence.";
+		cout << endl << endl << "Your entry must be a non-negative integer.";
+		cout << endl << endl << endl << "Your Selection:  ";
+
+		cin >> userSelection; //prompt user for input of a Fibonacci term
+
+		int sizeOfUserSelection(userSelection.length());  //convert user input size to in so it can be compared in the for loop
+
+		isNotString = false; //set LCV to false
+
+		for (int i = 0; i < sizeOfUserSelection; i++) //loop through the string contents
+		{
+			if (isdigit(userSelection[i]) == false) //if any string elements are not numbers...
+				isNotString = true; //...set LCV to true so that we can loop again and get valid user input
+		}
+
+		if (isNotString) //if input was invalid...
+		{
+      //...let the user know that the input was invalid
+			cout << endl << endl << "Sorry, that entry did not meet the criteria. Please try again." << endl << endl;
+      cin.ignore(); //clear the stream
+      cin.get(); //wait for user to hit a key to continue
+		}
+	}
+
+  //convert user input string to int after it's been validated
+	stringstream convertToInt(userSelection);
+
+	convertToInt >> fibonacciTerm;
+
+	return fibonacciTerm; //return validated user input
+}
+
+//recursively finds Fibonacci value
+int findFibonacciValue(int term)
+{
+	if (term == 0) //if term is 0...
+		return 0; //Fibonacci value is 0
+
+	if (term == 1) //if term is 1...
+		return 1; //Fibonacci value is 1
+
+	if (term >= 2) //if term is >= 2...
+		return (findFibonacciValue(term - 2) + findFibonacciValue(term - 1)); //find Fibonacci value recursively
+
+  else //this will never execute given the user validation functions above
+    return -1; //return error value
+}
+
+//uses equation (1) to find Fibonacci value
+int equationOne(int term)
+{
+	int fibValue = 0; //declare int to hold the calculated Fibonacci value
+
+  //use equation (1) to calculate Fibonacci value...equation always yields an integer
+	fibValue = ((pow((1 + sqrt(5)), term) - pow((1 - sqrt(5)), term)) / (pow(2, term) * (sqrt(5))));
+
+	return fibValue; //return the calculated value
+}
+
+//gets 'p' and 'n' values from user, checks validity, calls calculation function
+void equationTwo()
+{
+	int p = 0; //declare int to hold previous term
+	int n = 0; //declare int to hold desired term
+
+	string userSelection = ""; //declare string to hold user selection
+	bool isNotString = true; //declare boolean loop control variable
+
+
+
+	while (isNotString) //loop until valid user input received
+	{
+		system("clear"); //clear the screen prior to executing the function
+
+		cout << "Please enter a value for 'p', which is any previous term of the Fibanocci Sequence.";
+		cout << endl << endl << "Your entry must be a non-negative integer.";
+		cout << endl << endl << endl << "Your Selection:  ";
+
+		cin >> userSelection; //prompt user for input of a previous Fibonacci term
+
+		int sizeOfUserSelection(userSelection.length()); //convert user input size to in so it can be compared in the for loop
+
+		isNotString = false; //set LCV to false
+
+		for (int i = 0; i < sizeOfUserSelection; i++) //loop through the string contents
+		{
+			if (isdigit(userSelection[i]) == false) //if any string elements are not numbers...
+				isNotString = true; //...set LCV to true so that we can loop again and get valid user input
+		}
+
+		if (isNotString) //if input was invalid...
+		{
+      //...let the user know that the input was invalid
+			cout << endl << endl << "Sorry, that entry did not meet the criteria. Please try again." << endl << endl;
+      cin.ignore(); //clear the stream
+      cin.get(); //wait for user to hit a key to continue
+		}
+	}
+
+  //convert user input string to int after it's been validated
+	stringstream convertToInt(userSelection);
+
+	convertToInt >> p;
+
+	isNotString = true; //reset LCV
+
+	while (isNotString) //loop until valid user input received
+	{
+		system("clear"); //clear the screen prior to executing the function
+
+		cout << "Now please enter a value for 'n', which is the term of the Fibanocci Sequence you'd like to find.";
+		cout << endl << endl << "Your entry must be a non-negative integer and must also be larger than p.";
+		cout << endl << endl << endl << "Your Selection:  ";
+
+		cin >> userSelection; //prompt user for input of a desired Fibonacci term
+
+		int sizeOfUserSelection(userSelection.length()); //convert user input size to in so it can be compared in the for loop
+
+		isNotString = false; //set LCV to false
+
+		for (int i = 0; i < sizeOfUserSelection; i++) //loop through the string contents
+		{
+			if (isdigit(userSelection[i]) == false) //if any string elements are not numbers...
+				isNotString = true; //...set LCV to true so that we can loop again and get valid user input
+		}
+
+		if (isNotString == false) //if input was valid...
+		{
+      //convert user input string to int after it's been validated
+			stringstream convertToInt(userSelection);
+
+			convertToInt >> n;
+
+			if (n <= p) //if it's smaller than the user's input for a previous term...
+				isNotString = true; //...then it still isn't valid, so set LCV back to true
+		}
+
+		if (isNotString) //if input was invalid...
+		{
+      //...let the user know that the input was invalid
+			cout << endl << endl << "Sorry, that entry did not meet the criteria. Please try again." << endl << endl;
+      cin.ignore(); //clear the stream
+      cin.get(); //wait for user to hit a key to continue
+		}
+	}
+
+  //if input is finally validated, calculate the Fibonacci approximation using the equation (2) algorithm and print it
+	cout << endl << endl << "Using equation (2), with previous term " << p << ", the value of term " << n << " is approximately: " << equationTwoCalculation(n, p) << endl << endl;
+  cin.ignore(); //clear the stream
+	cin.get(); //wait for user to hit a key to continue
+}
+
+//uses equation (2) to find Fibonacci value
+int equationTwoCalculation(int n, int p)
+{
+	double fibValue = 0; //declare double to hold calculated Fibonacci value
+	int roundedFibValue = 0; //declare int to hold rounded Fibonacci value after calculation
+
+	fibValue = (equationOne(p) * pow(((1 + sqrt(5)) / 2), (n - p))); //calculate Fibonacci value using equation (2)
+
+	roundedFibValue = round(fibValue); //round the result and store it in the int variable
+
+	return roundedFibValue; //return the rounded int value
+}
+
+//gets 'p' value from user, checks validity, calls calculation function
+void equationThree()
+{
+	int term = 0; //declare int to hold desired Fibonacci term
+
+	string userSelection = ""; //declare string to hold user input
+	bool isNotString = true; //declare boolean loop control variable
+
+	while (isNotString) //continue the loop until valid input is received
+	{
+		system("clear"); //clear the screen prior to prompting user for input
+
+		cout << "Now, please enter a term you'd like to use to find the next term in the Fibanocci Sequence.";
+		cout << endl << endl << "Your entry must be a non-negative integer.";
+		cout << endl << endl << endl << "Your Selection:  ";
+
+		cin >> userSelection; //prompt user for input of a Fibonacci term
+
+		int sizeOfUserSelection(userSelection.length()); //convert user input size to in so it can be compared in the for loop
+
+		isNotString = false; //set LCV to false
+
+		for (int i = 0; i < sizeOfUserSelection; i++) //loop through the string contents
+		{
+			if (isdigit(userSelection[i]) == false) //if any string elements are not numbers...
+				isNotString = true; //...set LCV to true so that we can loop again and get valid user input
+		}
+
+		if (isNotString) //if input was invalid...
+		{
+      //...let the user know that the input was invalid
+			cout << endl << endl << "Sorry, that entry did not meet the criteria. Please try again." << endl << endl;
+      cin.ignore(); //clear the stream
+      cin.get(); //wait for user to hit a key to continue
+		}
+	}
+
+  //convert user input string to int after it's been validated
+	stringstream convertToInt(userSelection);
+
+	convertToInt >> term;
+
+  //if input is finally validated, calculate the Fibonacci approximation using the equation (3) algorithm and print it
+	cout << endl << endl << "Using equation (3), the value of term " << (term + 1) << " is approximately: " << equationThreeCalculation(term) << endl << endl;
+  cin.ignore(); //clear the stream
+	cin.get(); //wait for user to hit a key to continue
+}
+
+//uses equation (3) to find Fibonacci value
+int equationThreeCalculation(int term)
+{
+	double fibValue = 0; //declare double to hold calculated Fibonacci value
+	int roundedFibValue = 0; //declare int to hold rounded int Fibonacci value
+
+	fibValue = (equationOne(term) * ((1 + sqrt(5)) / 2)); //calculate value using equation (3) and store in double variable
+
+	roundedFibValue = round(fibValue); //round off the answer and store in int variable
+
+	return roundedFibValue; //return int value
+}
+
+//overall function for Part B, calls function that finds beginning and end vector addresses for largest sum
+void largestSum()
+{
+	system("clear"); //clear the screen prior to starting the next function
+
+  //display the assignment and the given sample input
+	cout << "Using the given sample inputs, print 4 resulting largest sum sub arrays.";
+
+	cout << endl << endl << "    Sample Input 1: (10, 2, -5, 1, 9, 0, -4, 2, -2)";
+
+	cout << endl << endl << "    Sample Input 2: (-7, 1, 8, 2, -3, 1)";
+
+	cout << endl << endl << "    Sample Input 3: (9, 7, 2, 16, -22, 11)";
+
+	cout << endl << endl << "    Sample Input 4: (6, 1, 9, -33, 7, 2, 9, 1, -3, 8, -2, 9, 12, -4)";
+
+	cout << endl << endl; //line spacing
+
+  //declare 4 vectors and initialize with sample input data
+	vector<int> sampleInput1 = { 10, 2, -5, 1, 9, 0, -4, 2, -2 };
+
+	vector<int> sampleInput2 = { -7, 1, 8, 2, -3, 1 };
+
+	vector<int> sampleInput3 = { 9, 7, 2, 16, -22, 11 };
+
+	vector<int> sampleInput4 = { 6, 1, 9, -33, 7, 2, 9, 1, -3, 8, -2, 9, 12, -4 };
+
+	int ends[2] = { 0 , 0 }; //declare an array to hold the beginning and end vector addresses of the largest sum subarray
+
+
+  //call the largest sum calculator for sample input vector 1, pass vector and array
+	largestSumCalculation(sampleInput1, ends);
+
+	cout << endl << endl << "    The output for Sample Input 1 is: (";
+
+  //loop through the vector starting at beginning of largest sum address and ending at end of largest sum address
+	for (int l = ends[0]; l < ends[1]; l++)
+	{
+		cout << sampleInput1[l]; //print values of largest sum array
+
+		if (l < (ends[1] - 1)) //if not the very last value...
+			cout << ", "; //...print a comma and space seperator
+	}
+
+	cout << ")"; //print the closing parenthesis
+
+
+
+  //call the largest sum calculator for sample input vector 2, pass vector and array
+	largestSumCalculation(sampleInput2, ends);
+
+	cout << endl << endl << "    The output for Sample Input 2 is: (";
+
+  //loop through the vector starting at beginning of largest sum address and ending at end of largest sum address
+	for (int m = ends[0]; m < ends[1]; m++)
+	{
+		cout << sampleInput2[m]; //print values of largest sum array
+
+		if (m < (ends[1] - 1)) //if not the very last value...
+			cout << ", "; //...print a comma and space seperator
+	}
+
+	cout << ")"; //print the closing parenthesis
+
+
+  //call the largest sum calculator for sample input vector 3, pass vector and array
+	largestSumCalculation(sampleInput3, ends);
+
+	cout << endl << endl << "    The output for Sample Input 3 is: (";
+
+  //loop through the vector starting at beginning of largest sum address and ending at end of largest sum address
+	for (int n = ends[0]; n < ends[1]; n++)
+	{
+		cout << sampleInput3[n]; //print values of largest sum array
+
+		if (n < (ends[1] - 1)) //if not the very last value...
+			cout << ", "; //...print a comma and space seperator
+	}
+
+	cout << ")"; //print the closing parenthesis
+
+
+  //call the largest sum calculator for sample input vector 4, pass vector and array
+	largestSumCalculation(sampleInput4, ends);
+
+	cout << endl << endl << "    The output for Sample Input 4 is: (";
+
+  //loop through the vector starting at beginning of largest sum address and ending at end of largest sum address
+	for (int o = ends[0]; o < ends[1]; o++)
+	{
+		cout << sampleInput4[o]; //print values of largest sum array
+
+		if (o < (ends[1] - 1)) //if not the very last value...
+			cout << ", "; //...print a comma and space seperator
+	}
+
+	cout << ")"; //print the closing parenthesis
+
+	cout << endl << endl; //line spacing
+  cin.ignore(); //clear the stream
+	cin.get(); //wait for user to hit a key to continue
+}
+
+//finds beginning and end vector addresses for largest sum
+void largestSumCalculation(vector<int> &sampleInput, int ends[2])
+{
+	int b = 0; //declare and initialize int to hold vector address of beginning of largest sum subarray
+	int e = 1; //declare and initialize int to hold vector address of end of largest sum subarray
+
+	int sum1 = 0; //declare and initialize int to hold the found sum of current searched subarray
+	int sum2 = (b + e); //declare and initialize int to hold largest subarray sum found so far
+
+	int sizeOfSampleInput(sampleInput.size()); //delcare and set int to hold int value of array size for loop comparison
+
+	for (int i = 0; i < (sizeOfSampleInput - 1); i++) //outer loop, loops through possible beginning values
+		for (int j = (i + 1); j < sizeOfSampleInput; j++) //middle loop, loops through possible end values
+		{
+			for (int k = i; k < j; k++) //inner loop, loops through current subarray and sums the values
+				sum1 = sum1 + sampleInput[k]; //sum the contents of the currently selected subarray
+
+			if (sum1 > sum2) //if the current subarray sum is greater than the largest one found up until now...
+			{
+				b = i; //...set the largest subarray beginning int to the current beginning int...
+				e = j; //...set the largest subarray end int to the current end int...
+				sum2 = sum1; //...and set the largest subarray sum found so far to the current subarray sum
+			}
+
+			sum1 = 0; //either way, reset the current subarray sum int
+		}
+
+  //after ending the loop and we have the beginning and end vector addresses of the largest sum subarray...
+  //...pass them to the passed "ends" array so that they can be used by the parent function
+	ends[0] = b;
+	ends[1] = e;
+}
