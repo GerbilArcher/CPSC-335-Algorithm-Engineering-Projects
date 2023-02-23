@@ -1,0 +1,311 @@
+//=====================================================================
+//CPSC-335-04 (13772) Scheduling Assignment (Project 1)
+//Document:       schedule.cpp (C++ Code File)
+//Due Date:       9/24/2021
+//Term:           Fall 2021
+//=====================================================================
+
+
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<sstream>
+using namespace std;
+
+//utility function declarations
+int convertChar(char convertMe); //declare function convertChar to convert char values from the input strings into integers for calculation
+string convertTime(int time); //declare function convertTime to convert times from integer minute forms back to time string forms
+
+//core function declarations
+string getFilepath();
+void fileProcessor(bool availableMinutes[], int &duration); //declare a function to process information from the input file
+void eliminateSingletons(bool availableMinutes[]); //declare a function to eliminate leftover singletons in the availableMinutes array
+void recordAvailableTimes(bool availableMinutes[],  int availableTimes[], int &timesCount); //declare a function to record the available times for each person
+void checkDuration(int availableTimes[], int &duration, int &timesCount); // declare a function to check the available times against the meeting duration
+void outputAvailableTimes(int availableTimes[], int &timesCount); //declare a function to output the availble times
+
+int main()
+{
+    bool availableMinutes[24 * 60] = { 0 }; //declare a boolean array to keep track of our minutes of the day still available for meetings
+    int availableTimes[24 * 60] = { 0 }; //declare an integer array to keep track of our available times
+    int timesCount = 0; //declare a count variable for how many available start and end times there are
+    int duration = 0; //declare an integer for the meeting duration
+
+
+    for (int i = 0; i < (24 * 60); i++) //initialize all of the values in the availableMinutes array to true since all minutes in the day are still currently available
+        availableMinutes[i] = true;
+
+    fileProcessor(availableMinutes, duration);  //call the file processing function
+
+    eliminateSingletons(availableMinutes);
+
+    recordAvailableTimes(availableMinutes, availableTimes, timesCount); //call the record available times function
+
+    checkDuration(availableTimes, duration, timesCount);
+
+    outputAvailableTimes(availableTimes, timesCount);
+
+
+    cin.get();
+}
+
+int convertChar(char convertMe) //function definition for char to int conversion function
+{
+    int convertedChar = 0; //declare and initiatlize integer variable
+
+    convertedChar = convertMe - '0'; //convert the passed char to type int
+
+    return convertedChar; //return the int value of the converted char
+}
+
+string convertTime(int time) //function definition for int to string conversion of times from availableTimes array
+{
+    int intHours = 0; //declare variable to hold hours as an int
+    int intMinutes = 0; //declare variable to hold minutes as an int
+
+    string strHours = ""; //declare variable to hold hours as a string
+    string strMinutes = ""; //declare variable to hold minutes as a string
+
+    string strTime = ""; //declare value for correclty formatted time to be returned
+
+    //calculate hours and minutes
+    intHours = (time / 60);
+    intMinutes = (time % 60);
+
+    //convert each int value to a string value and store in the corresponding string variables
+    stringstream hoursConverter;
+    stringstream minutesConverter;
+
+    hoursConverter << intHours;
+    minutesConverter << intMinutes;
+
+    strHours = hoursConverter.str();
+
+    //handle case when minutes string needs an extra zero since it's between 0 and 9
+    if (intMinutes < 10)
+    {
+        strMinutes.append("0"); //append a zero to the front of the string
+        strMinutes.append(minutesConverter.str()); //then append the integer value from the minutes stringstream
+    }
+    else //if minutes is 10 or more
+    {
+        strMinutes = minutesConverter.str(); //simply append the integer value from the minutes stringstream
+    }
+
+    //format the time string variable to show the correct time
+    strTime.append(strHours);
+    strTime.append(":");
+    strTime.append(strMinutes);
+
+    //return the strTime string showing the time in the proper form
+    return (strTime);
+}
+
+string getFilepath()
+{
+    string filePath = ""; //declare string variable for user entered filepath
+
+    cout << endl << endl << "Please provide the file path for the schedule file:  "; //prompt the user for the filepath
+
+    cin >> filePath;  //user inputs the file path
+
+    return filePath;
+}
+
+void fileProcessor(bool availableMinutes[], int &duration) //function definition for file processing function
+{
+    string buffer = ""; //declare a buffer string to keep each line of our input file in to be parsed
+    int sizeOfBuffer = 0; //declare an int to hold the size of the line taken from the file and stored in the buffer
+
+    int startTime = 0; //declare an integer for the start times we'll be pulling from the input file
+    int endTime = 0; //declare an integer for the end times we'll be pulling from the input file
+
+    string filePath = ""; //declare a string for the file path
+
+
+
+    filePath = getFilepath(); //get the filepath from the user
+
+    ifstream scheduleFile; //start the input stream for a file we'll call 'scheduleFile'
+
+    scheduleFile.open(filePath, ios::in); //open the file named Schedule1.txt
+
+    if (scheduleFile.is_open()) //if file is open...
+    {
+        while (getline(scheduleFile, buffer)) //grab each line from the 'scheduleFile' file and put it into the 'buffer' string
+        {
+            int sizeOfBuffer(buffer.length()); //convert the buffer length from size_t to int type and store in sizeOfBuffer variable
+
+            for (int j = 1; j < (sizeOfBuffer - 1); j++) //loop through each character of the string
+            {
+                if ((buffer[j] == '[') && (buffer[j + 1] == '\'')) //if these conditions are met then we know that i+2 will be the first character of a start time
+                {
+                    if (buffer[j + 3] == ':') //if this condition is met then we know that the start time hour will be a 1-digit number, otherwise it will be a 2-digit number
+                        startTime = (((convertChar(buffer[j + 2])) * 60) + ((convertChar(buffer[j + 4])) * 10) + (convertChar(buffer[j + 5])));
+                    //the integer start time gets the hour of the start time times 60, plus the minutes after colon to get the exact minute of the start time
+
+                    else //here we handle the case of a 2-digit start time
+                        startTime = (((convertChar(buffer[j + 2])) * 600) + ((convertChar(buffer[j + 3])) * 60) + ((convertChar(buffer[j + 5])) * 10) + (convertChar(buffer[j + 6])));
+                    //the integer start time gets the hour of the start time, plus the minutes after the colon to get the exact minute of the start time
+                }
+                else if (buffer[j] == ',') // if this condition is met, then we know we're about to hit an end time
+                {
+                    if (buffer[j + 4] == ':') //if this condition is met then we know that the end time hour will be a 1-digit number, otherwise it will be a 2-digit number
+                        endTime = (((convertChar(buffer[j + 3])) * 60) + ((convertChar(buffer[j + 5])) * 10) + (convertChar(buffer[j + 6])));
+                    //the integer end time gets the hour of the end time times 60, plus the minutes after colon to get the exact minute of the end time
+                    else //here we handle the case of a 2-digit end time
+                        endTime = (((convertChar(buffer[j + 3])) * 600) + ((convertChar(buffer[j + 4])) * 60) + ((convertChar(buffer[j + 6])) * 10) + (convertChar(buffer[j + 7])));
+                    //the integer end time gets the hour of the end time, plus the minutes after the colon to get the exact minute of the end time
+
+                //since we've just gotten an end time, presumably we now have a complete start time and end time
+                //if the start and end times denote an unavailable time, remove the minutes in between the start time and the end time from the times available to meet
+                    if (buffer.find("DailyAct") == -1) //if the current buffer string does not contain the substring "DailyAct" then we know we're dealing with an unavailable time
+                    {
+                        for (int k = (startTime + 1); k < (endTime); k++)
+                            availableMinutes[k] = false;
+                    }
+                    //if the start and end times denote the beginning and end of a person's available hours, remove the minutes before the start time and after the end time
+                    else //if the current string does contain the substring "DailyAct" then we know we're dealing with the start and end time of a person's available hours
+                    {
+                        for (int k = 0; k < startTime; k++)
+                            availableMinutes[k] = false;
+
+                        for (int k = (endTime + 1); k < (24 * 60); k++)
+                            availableMinutes[k] = false;
+                    }
+
+                    startTime = 0; //reset startTime
+                    endTime = 0; //reset endTime
+                }
+                else if ((buffer[j] == '=') && (buffer[j + 2] != '[')) //if this condition is met, then we know we're about to hit the duration, in minutes, of a meeting
+                {
+                    if ((sizeOfBuffer - j) == 3) //if this condition is met, then the meeting time is 1 character
+                        duration = (convertChar(buffer[j + 2])); //duration gets the value of the character at j + 2
+
+                    if ((sizeOfBuffer - j) == 4) //if this condition is met, then the meeting time is 2 characters
+                        duration = (((convertChar(buffer[j + 2])) * 10) + (convertChar(buffer[j + 3]))); // duration gets the value of the character at j + 3, plus the character in the tens place at j + 2
+
+                    if ((sizeOfBuffer - j) == 5) //if this condition is met, then the meeting time is 3 characters
+                        duration = (((convertChar(buffer[j + 2])) * 100) + (convertChar(buffer[j + 3]) * 10) + (convertChar(buffer[j + 4]))); //see cases above...follow the pattern
+
+                    if ((sizeOfBuffer - j) == 6) //if this condition is met, then the meeting time is 4 characters
+                        duration = ((convertChar(buffer[j + 2]) * 1000) + (convertChar(buffer[j + 3]) * 100) + ((convertChar(buffer[j + 4])) * 10) + (convertChar(buffer[j + 5]))); //see cases above...follow the pattern
+                }
+            }
+        }
+    }
+    scheduleFile.close(); //we're now done reading information from the file so we can close it
+}
+
+void eliminateSingletons(bool availableMinutes[])
+{
+    //loop through the available minutes array and if there are any minutes that are true with a false on either side, change them to false
+    for (int m = 0; m < (24 * 60); m++)
+    {
+        if ((availableMinutes[m] == false) && (availableMinutes[m + 1] == true) && (availableMinutes[m + 2] == false))
+            availableMinutes[m + 1] = false;
+    }
+}
+
+void recordAvailableTimes(bool availableMinutes[],  int availableTimes[], int &timesCount) //function definition for recordAvailableTimes process
+{
+
+    //loop through the available minutes array
+    for (int n = 0; n < (24 * 60); n++)
+    {
+        //if index 0 = true then the first start time is 0 (midnight)
+        if ((n == 0) && (availableMinutes[n] == true))
+        {
+            availableTimes[timesCount] = 0;
+            timesCount++;
+        }
+
+        //loop through the available minutes array until index = false and index + 1 = true...index + 1 will be a start time
+        if ((availableMinutes[n] == false) && (availableMinutes[n + 1] == true))
+        {
+            availableTimes[timesCount] = (n + 1);
+            timesCount++;
+        }
+
+        //loop through the available minutes array until index = true and index + 1 = false...index will be an end time
+        if ((availableMinutes[n] == true) && (availableMinutes[n + 1] == false))
+        {
+            availableTimes[timesCount] = n;
+            timesCount++;
+        }
+
+        //if index ((24 * 60) - 1) = true then the last end time is ((24 * 60) - 1) or 11:59pm
+        if ((n == ((24 * 60) - 1)) && (availableMinutes[n] == true))
+        {
+            availableTimes[timesCount] = (24 * 60);
+            timesCount++;
+        }
+    }
+}
+
+void checkDuration(int availableTimes[], int &duration, int &timesCount)
+{
+    int tempArray[(24 * 60)] = { 0 }; //declare a temporary array to hold validated start and end times after checking them against the meeting duration
+    int tempArrayCounter = 0; //declare a counter for the temporary array index
+
+    //wipe the timesCount variable
+    timesCount = 0;
+
+    //loop through the values
+       //if the amount of time between the start time and the end time is greater than the duration time then place them both into a temporary array
+    for (int p = 0; p < (24 * 60); p++)
+    {
+        if (((p % 2) == 0) && ((availableTimes[p + 1] - availableTimes[p]) >= duration))
+        {
+            tempArray[tempArrayCounter] = availableTimes[p];
+            tempArray[tempArrayCounter + 1] = availableTimes[p + 1];
+            tempArrayCounter = tempArrayCounter + 2;
+            timesCount = timesCount + 2;
+        }
+    }
+
+    //wipe the availableTimes array
+    for (int q = 0; q < (24 * 60); q++)
+        availableTimes[q] = 0;
+
+    //load the validated times back into the availableTimes array and update the timesCount variable
+    for (int r = 0; r < (24 * 60); r++)
+        availableTimes[r] = tempArray[r];
+ }
+
+void outputAvailableTimes(int availableTimes[], int &timesCount) //function definition for outputting the availble times
+{
+    string output = ""; //declare a string to keep our output in
+    string time = ""; //declare a string to keep converted times that need to be appended to the output string
+
+    //if no available meeting times output should be "There are no available meeting times."
+    if (timesCount == 0)
+        output = "There are no available meeting times.";
+    else
+    {
+        output.append("["); //append the first bracket to enclose all of the output
+
+        for (int p = 0; p < timesCount; p++)
+        {
+            if ((p % 2) == 0) //if p is even then we're handling a start time
+            {
+                output.append("['"); //append left bracket and single open quote
+                output.append(convertTime(availableTimes[p])); //append the time converted to string form
+                output.append("',"); //append a single close quote and an apostrophe time separator
+            }
+            else //if p is odd then we're handling an end time
+            {
+                output.append(" '"); //append a space and a single open quote
+                output.append(convertTime(availableTimes[p])); //append the time converted to string form
+                output.append("']"); //append a single close quote and a right bracket
+
+                if (p < (timesCount - 1)) //if this is not the final end time...
+                    output.append(", "); //...then add a comma separator and a space
+            }
+        }
+        output.append("]"); //append the last bracket to enclose all of the output
+    }
+
+    //print the output string to the console
+    cout << endl << endl << output << endl << endl;
+}
