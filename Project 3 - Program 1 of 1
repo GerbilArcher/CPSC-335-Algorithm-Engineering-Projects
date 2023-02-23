@@ -1,0 +1,399 @@
+//=====================================================================
+//CPSC-335-04 (13772) Sorting and Merging Arrays (Project 3)
+//Document:       project3.cpp (C++ Code File)
+//Due Date:       11/19/2021
+//Term:           Fall 2021
+//Also Attached:  Project 3 Readme.md File
+//=====================================================================
+
+
+#include<iostream>
+#include<string>
+#include<vector>
+using namespace std;
+
+void showMenu(int& loopControl); //shows the menu and calls the overall functions for Part A and Part B
+void algo1();
+void fillVectors(string sampleArray1[], string sampleArray2[], vector<string> &vector1, vector<string> &vector2, int sizeOfArray1, int sizeOfArray2);
+void sort(vector<string> &vector1, vector<string> &vector2);
+void printOutput(vector<string> outputVector);
+void algo2();
+void mergeSort(int array[4][10], int sizeOfSubarrays[3][4], int arrayCounter);
+void printOutput2(vector<int> outputVector);
+
+int main()
+{
+
+	int loopControl = 0; //declare loop control variable for menu fucntion
+
+	while (loopControl == 0) //loop the program menu while user has not selected to exit from the menu
+	{
+		showMenu(loopControl); //call show menu function and pass loop control variable by reference
+	}
+
+	system("clear"); //clear the screen when the progam has finished running
+
+	return 0;
+
+}
+
+
+//shows the menu and calls the overall functions for Part A and Part B
+void showMenu(int& loopControl)
+{
+	int userSelection = 0; //call variable to hold user selection
+	bool isNotValid = true; //call boolean loop control variable
+
+	while (isNotValid) //loop menu until a valid option is chosen
+	{
+		system("clear"); //clear the screen before showing the menu
+
+	//show the menu
+		cout << endl << endl << "          *-*-*-*-*   PROJECT 3 MENU   *-*-*-*-*";
+		cout << endl << endl << "    Please make your selection from the options below:";
+		cout << endl << endl << "    1. Algorithm 1: Pattern Sorting";
+		cout << endl << endl << "    2. Algorithm 2: Merging Sorted Arrays";
+		cout << endl << endl << "    3. Exit Program";
+		cout << endl << endl << endl << "    Your Selection:  ";
+
+		cin >> userSelection; //prompt the user for a menu selection
+
+		switch (userSelection) //case switch statement for user selection
+		{
+		case 1: //user chooses option 1, Fibonacci and Golden Ratio functions
+			algo1(); //call Algorithm 1 overall function if user picks option 1
+			isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+			break;
+
+		case 2: //user chooses option 2, Largest Sum Subarray functions
+			algo2(); //call Algorithm 2 overall function if user picks option 2
+			isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+			break;
+
+		case 3:
+			isNotValid = false; //user input is valid, so another loop not required, set LCV to false
+			loopControl = 1; //set menu loop control variable passed from main != 0 so program can terminate
+			break;
+
+		default: //if user hasn't selected 1, 2, or 3 the input is invalid
+			cout << endl << endl << "You've made an invalid selection.  Please try again." << endl << endl;
+			cin.ignore(); //clear the stream
+			cin.get(); //wait for user to hit a key to continue
+
+		}
+	}
+}
+
+void algo1()
+{
+	//arrays to hold the sample input data
+	string array1a[10] = { "1", "0", "-1", "0", "0", "1", "1" , "-1", "0", "1" };
+	string array1b[3] = { "0", "1", "-1" };
+
+	string array2a[11] = { "4", "2", "10", "10", "7", "2", "10", "7", "4", "2", "4" };
+	string array2b[4] = { "2", "4", "7", "10" };
+
+	string array3a[10] = { "9", "-2", "9", "23", "23", "-2", "9", "23", "9", "-2" };
+	string array3b[3] = { "9", "-2", "23" };
+
+
+	//arrays to process the input data
+	vector<string> vector1;
+	vector<string> vector2;
+
+	//integers to hold array sizes
+	int sizeOfArray1 = 0;
+	int sizeOfArray2 = 0;
+
+
+	//print the sample data to the screen so the user knows what data is going to be sorted, and by what criteria
+	system("clear");
+
+	cout << endl << endl << "Here is the sample data to be processed: " << endl << endl;
+	cout << "Inputs for Project 3: Algorithm 1" << endl << endl;
+
+
+	cout << "array 1a = [1, 0, -1, 0, 0, 1, 1, -1, 0, 1]" << endl;
+	cout << "array 1b = [0, 1, -1]" << endl << endl;
+	cout << "array 2a = [4, 2, 10, 10, 7, 2, 10, 7, 4, 2, 4]" << endl;
+	cout << "array 2b = [2, 4, 7, 10]" << endl << endl;
+	cout << "array 3a = [9, -2, 9, 23, 23, -2, 9, 23, 9, -2]" << endl;
+	cout << "array 3b = [9, -2, 23]" << endl << endl;
+
+	cin.get();
+
+	//process and output data for array set 1
+	sizeOfArray1 = sizeof(array1a)/sizeof(array1a[0]);
+	sizeOfArray2 = sizeof(array1b)/sizeof(array1b[0]);
+
+	fillVectors(array1a, array1b, vector1, vector2, sizeOfArray1, sizeOfArray2);
+	sort(vector1, vector2);
+
+	cout << endl << endl << "Here is the sorted output for array 1: ";
+	printOutput(vector1);
+	vector1.clear();
+
+
+	//process and output data for array set 2
+	sizeOfArray1 = sizeof(array2a)/sizeof(array2a[0]);
+	sizeOfArray2 = sizeof(array2b)/sizeof(array2b[0]);
+
+	fillVectors(array2a, array2b, vector1, vector2, sizeOfArray1, sizeOfArray2);
+	sort(vector1, vector2);
+
+	cout << endl << endl << "Here is the sorted output for array 2: ";
+	printOutput(vector1);
+	vector1.clear();
+
+
+	//process and output data for array set 3
+	sizeOfArray1 = sizeof(array3a)/sizeof(array3a[0]);
+	sizeOfArray2 = sizeof(array3b)/sizeof(array3b[0]);
+
+	fillVectors(array3a, array3b, vector1, vector2, sizeOfArray1, sizeOfArray2);
+	sort(vector1, vector2);
+
+	cout << endl << endl << "Here is the sorted output for array 3: ";
+	printOutput(vector1);
+	vector1.clear();
+
+	cout << endl << endl;
+	cin.get();
+}
+
+void fillVectors(string sampleArray1[], string sampleArray2[], vector<string> &vector1, vector<string> &vector2, int sizeOfArray1, int sizeOfArray2)
+{
+	string vessel = "";
+
+	for (int i = 0; i < sizeOfArray1; i++)
+	{
+		vessel = sampleArray1[i];
+		vector1.push_back(vessel);
+	}
+
+
+	for (int j = 0; j < sizeOfArray2; j++)
+	{
+		vessel = sampleArray2[j];
+		vector2.push_back(vessel);
+	}
+
+}
+
+void sort(vector<string> &vector1, vector<string> &vector2)
+{
+
+	//integer variable to store size of vector1
+	int x = 0;
+
+	//integer variable to store size of vector2
+	int y = 0;
+
+	//string variable to hold items to be tested against from vector2
+	string slipper = "";
+
+	//string variable to hold items to test from vector1
+	string foot = "";
+
+	//inner loop partition integer variable
+	int b = 0;
+
+	//string variables to hold vector values to be interchanged
+	string swap = "";
+	string holder = "";
+
+	//set x and y to the sizes of vector1 and vector2 for loop control purposes
+	x = vector1.size();
+	y = vector2.size();
+
+	//start the outer loop to go through vector2
+	for (int i = 0; i < y; i++)
+	{
+		slipper = vector2[i]; //set slipper equal to the element of vector2 that elements of vector1 need to be tested against
+
+		//loop through vector 1
+		for (int j = 0; j < x; j++)
+		{
+			for (int k = b; k < x; k++)
+			{
+				foot = vector1[j]; //set slipper equal to the element of vector 1 that needs to be tested against the element from vector2
+
+				if (slipper == foot && j == b) //if slipper and foot match AND this is the first value...
+				{
+					//move on to the next iteration
+					b++;
+					break;
+				}
+
+				if (slipper == foot && j != b) //if slipper and foot match AND this is not the first value...
+				{
+					//swap this value for the first unsorted value and move on to the next one
+					swap = vector1[b];
+					holder = vector1[j];
+					vector1[b] = holder;
+					vector1[j] = swap;
+					b++;
+					break;
+				}
+
+			}
+		}
+	}
+}
+
+void printOutput(vector<string> outputVector)
+{
+	int size = 0; //int to hold size of output vector
+
+	size = outputVector.size(); //get size of output vector
+
+	cout << "["; //print the left bracket
+
+	for (int i = 0; i < size; i++) //print the contents of the vector
+	{
+		cout << outputVector[i];
+
+		if (i != (size - 1)) //if this is not the last value to print...
+			cout << ", ";//...then print a comma seperator
+	}
+
+	cout << "]" << endl; //print the right bracket
+}
+
+void algo2()
+{
+	//arrays to hold the sample input data
+	int array1[4][10] = { {2, 5, 9, 21},
+						  {-1, 0, 2},
+						  {-10, 81, 121},
+						  {4, 6, 12, 20, 150} };
+	int array2[4][10] = { {10, 17, 18, 21, 29},
+						  {-3, 0, 3, 7, 8, 11},
+						  {81, 88, 121, 131},
+						  {9, 11, 12, 19, 29} };
+	int array3[4][10] = { {-4, -2, 0, 2, 7},
+						  {4, 6, 12, 14},
+						  {10, 15, 25},
+						  {5, 6, 10, 20, 24} };
+
+	//this algorithm assumes i've counted the sizes of the subarrays as they're imported into the program
+	int sizeOfSubarrays[3][4] = { {4,3,3,5},{5,6,4,5},{5,4,3,5} };
+	int arrayCounter = 0;
+
+	//print the sample data to the screen so the user knows what data is going to be sorted, and by what criteria
+	system("clear");
+
+	cout << endl << endl << "Here is the sample data to be processed: " << endl << endl;
+	cout << "Inputs for Project 3: Algorithm 2" << endl << endl;
+
+	cout << "Array_1 = [[2, 5, 9, 21]," << endl;
+	cout << "\t  [-1, 0, 2]," << endl;
+	cout << "\t  [-10, 81, 121]" << endl;
+	cout << "\t  [4, 6, 12, 20, 150]]" << endl << endl;
+
+	cout << "Array_2 = [[10, 17, 18, 21, 29]," << endl;
+	cout << "\t  [-3, 0, 3, 7, 8, 11]," << endl;
+	cout << "\t  [81, 88, 121, 131]" << endl;
+	cout << "\t  [9, 11, 12, 19, 29] ]" << endl << endl;
+
+	cout << "Array_3 = [[-4, -2, 0, 2, 7]," << endl;
+	cout << "\t  [4, 6, 12, 14]," << endl;
+	cout << "\t  [10, 15, 25]" << endl;
+	cout << "\t  [5, 6, 10, 20, 24]]" << endl << endl;
+
+	cin.get();
+
+	//process and output data for array set 1
+	cout << endl << endl << "Here is the sorted output for array 1:\t";
+	mergeSort(array1, sizeOfSubarrays, arrayCounter);
+	arrayCounter++;
+
+	//process and output data for array set 2
+	cout << endl << endl << "Here is the sorted output for array 2:\t";
+	mergeSort(array2, sizeOfSubarrays, arrayCounter);
+	arrayCounter++;
+
+	//process and output data for array set 3
+	cout << endl << endl << "Here is the sorted output for array 3:\t";
+	mergeSort(array3, sizeOfSubarrays, arrayCounter);
+
+	cout << endl << endl;
+	cin.get();
+
+}
+
+void mergeSort(int array[4][10], int sizeOfSubarrays[3][4], int arrayCounter)
+{
+	//declare a vector to hold the sorted values
+	vector<int> sortedList;
+
+	//declare an integer array to hold the smallest value from each array
+	int smallest[4];
+
+	//declare an integer to hold the best (smallest) integer found so far in the loop
+	int best = 0;
+
+	//declare an integer to hold the value of the array that the best value was in
+	int bestArray = 0;
+
+	//declare an integer array to hold the partition variables for the parts of the arrays already sorted
+	int subArrayPartitions[4] = { 0, 0, 0, 0 };
+
+	//loop through the contents of all 4 subarrays
+	for (int a = 0; a < (sizeOfSubarrays[arrayCounter][0] + sizeOfSubarrays[arrayCounter][1] + sizeOfSubarrays[arrayCounter][2] + sizeOfSubarrays[arrayCounter][3]); a++)
+	{
+		//loop 4 times and get the first (smallest) value from each subarray
+		for (int i = 0; i < 4; i++)
+			smallest[i] = array[i][subArrayPartitions[i]];
+
+		//loop 4 times to go through the smallest subarray
+		for (int k = 0; k < 4; k++)
+		{
+			//if the current array hasn't already been completely sorted...
+			if (subArrayPartitions[k] < sizeOfSubarrays[arrayCounter][k])
+			{
+				best = smallest[k];//best gets the first unsorted value in the current array
+				bestArray = k;//bestarray gets the value of the array you just pulled that value from
+				break;//break the for loop since you now have a value in best
+			}
+		}
+
+		//loop through the smallest array
+		for (int j = 0; j < 4; j++)
+		{
+			//if the current value is smaller than the best value AND the vector hasn't already been completely sorted
+			if ((smallest[j] < best) && (subArrayPartitions[j] < sizeOfSubarrays[arrayCounter][j]))
+			{
+				//replace best with the current value and bestarray with the value of the array you just pulled that value from
+				best = smallest[j];
+				bestArray = (j);
+			}
+		}
+
+
+		sortedList.push_back(best); //add best to the back of the sorted list vector
+		subArrayPartitions[bestArray]++; //increment the partition value of the array you just pulled the best value from
+	}
+
+	printOutput2(sortedList);//when all values are sorted, call the print function
+
+}
+
+void printOutput2(vector<int> outputVector)
+{
+	int size = 0; //declare into to hold the size of the vector
+
+	size = outputVector.size(); //get the size of the vector
+
+	cout << "[";//print the left bracket
+
+	for (int i = 0; i < size; i++) //print the contents of the output vector
+	{
+		cout << outputVector[i];
+
+		if (i != (size - 1)) //if this is not the last element to print...
+			cout << ", ";//...then print a comma seperator
+	}
+
+	cout << "]" << endl;//print the right bracket
+}
